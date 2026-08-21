@@ -6,10 +6,12 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { CarsService } from './cars.service';
 import { CreateCarDto } from './dto/create-car.dto';
 import { UpdateCarDto } from './dto/update-car.dto';
+import { GetCarsFilterDto } from './dto/get-cars-filter.dto';
 
 @Controller('cars')
 export class CarsController {
@@ -21,8 +23,8 @@ export class CarsController {
   }
 
   @Get()
-  findAll() {
-    return this.carsService.findAll();
+  findAll(@Query() filterDTO: GetCarsFilterDto) {
+    return this.carsService.findAll(filterDTO);
   }
 
   @Get(':id')

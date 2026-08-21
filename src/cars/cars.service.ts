@@ -4,10 +4,11 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, FindManyOptions, ILike } from 'typeorm';
 import { CreateCarDto } from './dto/create-car.dto';
 import { UpdateCarDto } from './dto/update-car.dto';
 import { Car } from './entities/car.entity';
+import { GetCarsFilterDto } from './dto/get-cars-filter.dto';
 
 @Injectable()
 export class CarsService {
@@ -37,8 +38,23 @@ export class CarsService {
     }
   }
 
-  async findAll() {
-    return await this.carRepository.find();
+  async findAll(filterDTO: GetCarsFilterDto) {
+    const { make, available, page = 1, limit = 10 } = filterDTO;
+
+    const queryOPtions: FindManyOptions<Car> = {
+      where: {},
+      take: limit,
+      skip: (page - 1) * limit,
+    };
+    if (make) {
+      queryOPtions.where = { ...queryOPtions.where, make: ILike(`%${make}%`) };
+    }
+
+    if (available !== undefined) {
+      queryOPtions.where = { ...queryOPtions.where, isAvailable: available };
+    }
+
+    return await this.carRepository.find(queryOPtions);
   }
 
   findOne(id: number) {
